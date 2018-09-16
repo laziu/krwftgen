@@ -1,0 +1,7 @@
+/assets/**
+/public/css/**
+/public/fonts/**
+!README.md
+
+__pycache__
+goorm.manifest
