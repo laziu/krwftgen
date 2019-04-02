@@ -3,19 +3,34 @@ import os
 import re
 import requests
 
-url = 'https://fonts.googleapis.com/css?family=Nanum+Gothic'
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
-}
-r = requests.get(url, headers=headers)
+google_fonts_sample_url = 'https://fonts.googleapis.com/css?family=Nanum+Gothic'
 
-unicodes = []
-for line in r.content.decode('ascii').splitlines():
-    if "unicode-range" in line:
-        unicodes.append(re.sub(r'[;\s]', "", line.split(":")[1]))
 
-for u in unicodes:
-    print(u)
+class Memoize:
+    def __init__(self, fn):
+        self.fn = fn
+        self.memoized = {}
+
+    def __call__(self, *args):
+        if args not in self.memoized:
+            self.memoized[args] = self.fn(*args)
+        return self.memoized[args]
+
+
+@Memoize
+def unicode_subranges():
+    """List of unicode sub-ranges in Google Fonts Korean CSS."""
+    unicodes = []
+    result = requests.get(google_fonts_sample_url, headers={
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
+    })
+    for line in result.content.decode('utf-8').splitlines():
+        if "unicode-range" in line:
+            unicodes.append(re.sub(r'[;\s]', "", line.split(":")[1]))
+    return unicodes
+
+
+print(os.getcwd())
 
 
 def getpath(file):
