@@ -13,7 +13,7 @@ def get_unicode_range_from_css(lines):
     unicodes = []
     for line in lines:
         if "unicode-range" in line:
-            unicodes.append(re.sub('[;\s]', "", line.split(":")[1]))
+            unicodes.append(re.sub(r'[;\s]', "", line.split(":")[1]))
     return unicodes
 
 
