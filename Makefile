@@ -1,3 +1,5 @@
+PYTHON = python
+
 all:
 	./setup.py build
 
@@ -8,7 +10,7 @@ install-dev: venv
 	./.venv/Scripts/python -m pip install -r ./dev-requirements.txt
 
 venv:
-	python -m venv .venv
+	$(PYTHON) -m venv .venv
 
 clean:
 	rm -rf ./.venv
