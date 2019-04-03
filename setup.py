@@ -24,7 +24,7 @@ setup(
     packages=find_packages('Lib'),
     entry_points={
         'console_scripts': [
-            'krftsubset = krftsubset.__main__:main'
+            'krftsubset = Lib.__main__:main'
         ]
     },
     classifiers=[
