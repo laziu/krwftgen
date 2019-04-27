@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='krftsubset',
+    name='krwftgen',
     version='0.1',
-    description='Korean font substractor using Google Fonts + Korean',
+    description='Korean webfont generator using Google Fonts + Korean',
     author='Laziu Kim',
     author_email='laziu.cc@gmail.com',
-    url='https://github.com/laziu/krftsubset',
-    download_url='https://github.com/laziu/krftsubset/archive/???',
+    url='https://github.com/laziu/krwftgen',
+    download_url='https://github.com/laziu/krwftgen/archive/???',
     python_requires='>=3.4',
     install_requires=[
         'fonttools==3.39.0',
@@ -24,7 +24,7 @@ setup(
     packages=find_packages('Lib'),
     entry_points={
         'console_scripts': [
-            'krftsubset = Lib.__main__:main'
+            'krwftgen = Lib.__init__:krwftgen'
         ]
     },
     classifiers=[
