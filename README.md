@@ -1,4 +1,4 @@
-** ※ 완성되지 않은 프로젝트입니다. ※ **
+#### ※ 완성되지 않은 프로젝트입니다. ※
 
 ## 이게 뭔가요?
 
@@ -11,8 +11,9 @@
 git clone https://github.com/laziu/krwftgen.git
 cd krwftgen
 python -m venv .venv            # >= 3.4
-source .venv/bin/activate       # cmd: '.venv/bin/activate.bat'
-python -m pip install -r requirements.txt
+source .venv/bin/activate       # PS: '.\.venv\Scripts\Activate.ps1'
 python -m pip install -r dev-requirements.txt
+python -m pip install -r requirements.txt
 python -m pip install --editable .
+# krwftgen -h
 ```
