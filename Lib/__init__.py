@@ -2,6 +2,8 @@ import click
 import os
 import re
 import requests
+import tempfile
+import shutil
 from fontTools import ttLib
 from fontTools.subset import main as pyftsubset
 
@@ -42,9 +44,11 @@ def krwftgen(output_path, name, format, weight, font_path):
 
     print(output_path, name, format, weight, font_path)
 
+    temp = TempFolder()
+
     pyftsubset([font_path,
                 "--unicodes=U+d723-d728,U+d72a-d733,U+d735-d748,U+d74a-d74f,U+d752-d753,U+d755-d757,U+d75a-d75f,U+d762-d764,U+d766-d768,U+d76a-d76b,U+d76d-d76f,U+d771-d787,U+d789-d78b,U+d78d-d78f,U+d791-d797,U+d79a,U+d79c,U+d79e-d7a3,U+f900-f909,U+f90b-f92e",
-                "--output-file=%s" % rel_path("sample_output.ttf"),
+                "--output-file=%s" % temp.path("sample_output.ttf"),
                 "--layout-features='*'",
                 "--glyph-names",
                 "--symbol-cmap",
@@ -80,3 +84,16 @@ def unicode_subranges():
 def rel_path(relative_path):
     """Get absolute path from relative path."""
     return os.path.join(os.getcwd(), relative_path)
+
+
+class TempFolder:
+    def __init__(self):
+        """Clear temporary folder."""
+        self.root = os.path.join(tempfile.gettempdir(), "krwftgen")
+        if os.path.exists(self.root):
+            shutil.rmtree(self.root)
+        os.makedirs(self.root)
+
+    def path(self, relative_path):
+        """Get temporary path from relative path."""
+        return os.path.join(self.root, relative_path)
