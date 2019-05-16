@@ -18,7 +18,7 @@ browser_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 @click.version_option(version='0.1.0')
 @click.option('-o', '--output', 'output_path', metavar='<file>',
               type=click.Path(exists=False, dir_okay=False, resolve_path=True),
-              default=lambda: rel_path('output.tar.gz'),
+              default=lambda: rel_path('<file>'),
               help='The output archive file path.')
 @click.option('-n', '--name', metavar='<text>', type=click.STRING,
               help='font-name of output fonts.  [default: <font-file>]')
@@ -43,6 +43,7 @@ def krwftgen(output_path, name, format, weight, font_path):
     if name is None:
         name = get_font_family_name(font_path)
     esc_name = re.sub(r'\W', "_", name)
+    output_path = rel_path(esc_name)
 
     print(output_path, name, format, weight, font_path, esc_name)
 
@@ -52,14 +53,18 @@ def krwftgen(output_path, name, format, weight, font_path):
     gen_path(out_path)
 
     with StyleWriter(font_info, temp_folder) as wb:
-        for i, urange in enumerate(unicode_subranges()):
+        unicode_range_list = unicode_subranges()
+        list_len = len(unicode_range_list)
+        for i, urange in enumerate(unicode_range_list):
             i_str = "%03d" % i
-            print(f'processing {i_str}...')
+            print(f'processing ({i_str}/{list_len})')
             make_subset(font_path, out_path, i_str, urange, font_info)
             make_subset(font_path, out_path, i_str,
                         urange, font_info, woff2=True)
             wb.css_write(i_str, urange)
             wb.scss_write(i_str, urange)
+
+    make_zip(output_path, temp_folder.path(f"{esc_name}"))
 
 
 def get_font_family_name(font_path):
@@ -114,6 +119,10 @@ def rel_path(relative_path):
 
 def gen_path(new_path):
     pathlib.Path(new_path).mkdir(parents=True, exist_ok=True)
+
+
+def make_zip(out_path, dir_path):
+    shutil.make_archive(out_path, 'zip', dir_path)
 
 
 class TempFolder:
