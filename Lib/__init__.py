@@ -4,6 +4,7 @@ import re
 import requests
 import tempfile
 import shutil
+import pathlib
 from fontTools import ttLib
 from fontTools.subset import main as pyftsubset
 
@@ -41,25 +42,24 @@ def krwftgen(output_path, name, format, weight, font_path):
     """
     if name is None:
         name = get_font_family_name(font_path)
+    esc_name = re.sub(r'\W', "_", name)
 
-    print(output_path, name, format, weight, font_path)
+    print(output_path, name, format, weight, font_path, esc_name)
 
-    temp = TempFolder()
+    font_info = FontInfo(name, format, weight)
+    temp_folder = TempFolder()
+    out_path = temp_folder.path(f"{esc_name}/{font_info.weight}")
+    gen_path(out_path)
 
-    pyftsubset([font_path,
-                "--unicodes=U+d723-d728,U+d72a-d733,U+d735-d748,U+d74a-d74f,U+d752-d753,U+d755-d757,U+d75a-d75f,U+d762-d764,U+d766-d768,U+d76a-d76b,U+d76d-d76f,U+d771-d787,U+d789-d78b,U+d78d-d78f,U+d791-d797,U+d79a,U+d79c,U+d79e-d7a3,U+f900-f909,U+f90b-f92e",
-                "--output-file=%s" % temp.path("sample_output.ttf"),
-                "--layout-features='*'",
-                "--glyph-names",
-                "--symbol-cmap",
-                "--legacy-cmap",
-                "--notdef-glyph",
-                "--notdef-outline",
-                "--recommended-glyphs",
-                "--name-legacy",
-                "--drop-tables=",
-                "--name-IDs='*'",
-                "--name-languages='*'"])
+    with StyleWriter(font_info, temp_folder) as wb:
+        for i, urange in enumerate(unicode_subranges()):
+            i_str = "%03d" % i
+            print(f'processing {i_str}...')
+            make_subset(font_path, out_path, i_str, urange, font_info)
+            make_subset(font_path, out_path, i_str,
+                        urange, font_info, woff2=True)
+            wb.css_write(i_str, urange)
+            wb.scss_write(i_str, urange)
 
 
 def get_font_family_name(font_path):
@@ -81,9 +81,39 @@ def unicode_subranges():
     return unicodes
 
 
+def make_subset(font_path, out_path, index, uni_range, font_info, woff2=False):
+    esc_name = re.sub(r'\W', "_", font_info.name)
+    commands = [
+        font_path,
+        f"--unicodes={uni_range}",
+        f"--output-file={out_path}/{index}.{'woff2' if woff2 else 'woff'}",
+        "--layout-features='*'",
+        "--glyph-names",
+        "--symbol-cmap",
+        "--legacy-cmap",
+        "--notdef-glyph",
+        "--notdef-outline",
+        "--recommended-glyphs",
+        "--name-legacy",
+        "--drop-tables=",
+        "--name-IDs='*'",
+        "--name-languages='*'"
+    ]
+    if woff2:
+        commands.append('--flavor=woff2')
+    else:
+        commands.append('--flavor=woff')
+        commands.append('--with-zopfli')
+    pyftsubset(commands)
+
+
 def rel_path(relative_path):
     """Get absolute path from relative path."""
     return os.path.join(os.getcwd(), relative_path)
+
+
+def gen_path(new_path):
+    pathlib.Path(new_path).mkdir(parents=True, exist_ok=True)
 
 
 class TempFolder:
@@ -97,3 +127,72 @@ class TempFolder:
     def path(self, relative_path):
         """Get temporary path from relative path."""
         return os.path.join(self.root, relative_path)
+
+
+class FontInfo:
+    def __init__(self, name, format_list, weight):
+        self.name = name
+        self.format_list = format_list
+        self.weight = weight
+
+
+class StyleWriter:
+    def __init__(self, font_info, temp_folder):
+        self.font_info = font_info
+        self.temp_folder = temp_folder
+
+    def __enter__(self):
+        esc_name = re.sub(r'\s', "_", self.font_info.name)
+        gen_path(self.temp_folder.path(esc_name))
+        self.css = open(self.temp_folder.path(
+            f"{esc_name}/{self.font_info.weight}.css"), "w")
+        self.scss = open(self.temp_folder.path(
+            f"{esc_name}/{self.font_info.weight}.scss"), "w")
+        self.scss.write(
+            ((
+                "@mixin font-subset( $index, $range ) {{\n"
+                "  @font-face {{\n"
+                "    font-family: '{name}';\n"
+                "    font-style: normal;\n"
+                "    font-weight: {weight}\n"
+                "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff2') format('woff2'),\n"
+                "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
+                "    unicode-range: #{{$range}};\n"
+                "  }}\n"
+                "}}\n\n"
+            )).format(
+                name=self.font_info.name,
+                weight=self.font_info.weight,
+                dest="."
+            )
+        )
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.css.close()
+        self.scss.close()
+
+    def css_write(self, index, unicode_range):
+        self.css.write(
+            ((
+                "@font-face {{\n"
+                "  font-family: '{name}';\n"
+                "  font-style: normal;\n"
+                "  font-weight: {weight};\n"
+                "  src: url('{dest}/{name}/{weight}/{index}.woff2') format('woff2'),\n"
+                "       url('{dest}/{name}/{weight}/{index}.woff' ) format('woff' );\n"
+                "  unicode-range: {range};\n"
+                "}}\n\n"
+            )).format(
+                name=self.font_info.name,
+                weight=self.font_info.weight,
+                index=index,
+                range=unicode_range,
+                dest="."
+            )
+        )
+
+    def scss_write(self, index, unicode_range):
+        self.scss.write(
+            f"@include font-subset( '{index}', '{unicode_range}' );\n"
+        )
