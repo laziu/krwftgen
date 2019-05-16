@@ -165,7 +165,7 @@ class StyleWriter:
                 "    font-style: normal;\n"
                 "    font-weight: {weight}\n"
                 "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff2') format('woff2'),\n"
-                "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
+                "         url('{dest}/{name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
                 "    unicode-range: #{{$range}};\n"
                 "  }}\n"
                 "}}\n\n"
