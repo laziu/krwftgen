@@ -194,7 +194,7 @@ class StyleWriter:
             ) + ((
                 "    src: url('{dest}/{esc_name}/{weight}/{index}.woff' ) format('woff' );\n"
             ) if 'woff2' not in self.font_info.format_list else (
-                "    src: url('{dest}/{esc_name}/{weight}/{index}.woff2') format('woff2'),\n"
+                "    src: url('{dest}/{esc_name}/{weight}/{index}.woff2') format('woff2');\n"
             ) if 'woff' not in self.font_info.format_list else (
                 "    src: url('{dest}/{esc_name}/{weight}/{index}.woff2') format('woff2'),\n"
                 "         url('{dest}/{esc_name}/{weight}/{index}.woff' ) format('woff' );\n"
