@@ -43,8 +43,6 @@ def krwftgen(name, format, weight, style, font_path):
     esc_name = re.sub(r'\W', "_", name)
     output_path = rel_path(esc_name)
 
-    print(output_path, name, format, weight, style, font_path, esc_name)
-
     font_info = FontInfo(name, format, weight, style)
     temp_folder = TempFolder()
     out_path = temp_folder.path(f"{esc_name}/{font_info.weight}")
@@ -55,7 +53,7 @@ def krwftgen(name, format, weight, style, font_path):
         list_len = len(unicode_range_list)
         for i, urange in enumerate(unicode_range_list):
             i_str = "%03d" % i
-            print(f'processing ({i_str}/{list_len})')
+            print(f'processing ({i_str}/{list_len})...')
             make_subset(font_path, out_path, i_str, urange, font_info)
             wb.css_write(i_str, urange)
             wb.scss_write(i_str, urange)
@@ -83,23 +81,24 @@ def unicode_subranges():
 
 
 def make_subset(font_path, out_path, index, uni_range, font_info):
+    """Generate subset font."""
     def commands(format):
         return [
-        font_path,
-        f"--unicodes={uni_range}",
+            font_path,
+            f"--unicodes={uni_range}",
             f"--output-file={out_path}/{index}.{format}",
-        "--layout-features='*'",
-        "--glyph-names",
-        "--symbol-cmap",
-        "--legacy-cmap",
-        "--notdef-glyph",
-        "--notdef-outline",
-        "--recommended-glyphs",
-        "--name-legacy",
-        "--drop-tables=",
-        "--name-IDs='*'",
-        "--name-languages='*'"
-    ]
+            "--layout-features='*'",
+            "--glyph-names",
+            "--symbol-cmap",
+            "--legacy-cmap",
+            "--notdef-glyph",
+            "--notdef-outline",
+            "--recommended-glyphs",
+            "--name-legacy",
+            "--drop-tables=",
+            "--name-IDs='*'",
+            "--name-languages='*'"
+        ]
     if 'woff2' in font_info.format_list:
         pyftsubset(commands('woff2') + ['--flavor=woff2'])
     if 'woff' in font_info.format_list:
@@ -112,10 +111,12 @@ def rel_path(relative_path):
 
 
 def gen_path(new_path):
+    """Create path."""
     pathlib.Path(new_path).mkdir(parents=True, exist_ok=True)
 
 
 def make_zip(out_path, dir_path):
+    """Export dir_path to zip file."""
     shutil.make_archive(out_path, 'zip', dir_path)
 
 
@@ -147,6 +148,7 @@ class StyleWriter:
         self.temp_folder = temp_folder
 
     def __enter__(self):
+        """Initialize css / scss file."""
         gen_path(self.temp_folder.path(self.font_info.esc_name))
         self.css = open(self.temp_folder.path(
             f"{self.font_info.esc_name}/{self.font_info.weight}.css"), "w")
