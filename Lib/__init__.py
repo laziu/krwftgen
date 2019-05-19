@@ -28,9 +28,11 @@ browser_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 @click.option('-w', '--weight', metavar='<int>',
               default=400, show_default=True,
               help='font-weight of output fonts.')
+@click.option('--style', metavar='<text>',
+              default='normal', show_default=True)
 @click.argument('font_path', metavar='<font-path>',
                 type=click.Path(exists=True, dir_okay=False, resolve_path=True))
-def krwftgen(output_path, name, format, weight, font_path):
+def krwftgen(output_path, name, format, weight, style, font_path):
     """\
     krwftgen -- Korean webfont generator
 
@@ -45,9 +47,9 @@ def krwftgen(output_path, name, format, weight, font_path):
     esc_name = re.sub(r'\W', "_", name)
     output_path = rel_path(esc_name)
 
-    print(output_path, name, format, weight, font_path, esc_name)
+    print(output_path, name, format, weight, style, font_path, esc_name)
 
-    font_info = FontInfo(name, format, weight)
+    font_info = FontInfo(name, format, weight, style)
     temp_folder = TempFolder()
     out_path = temp_folder.path(f"{esc_name}/{font_info.weight}")
     gen_path(out_path)
@@ -87,7 +89,6 @@ def unicode_subranges():
 
 
 def make_subset(font_path, out_path, index, uni_range, font_info, woff2=False):
-    esc_name = re.sub(r'\W', "_", font_info.name)
     commands = [
         font_path,
         f"--unicodes={uni_range}",
@@ -139,10 +140,11 @@ class TempFolder:
 
 
 class FontInfo:
-    def __init__(self, name, format_list, weight):
+    def __init__(self, name, format_list, weight, style):
         self.name = name
         self.format_list = format_list
         self.weight = weight
+        self.style = style
 
 
 class StyleWriter:
@@ -162,7 +164,7 @@ class StyleWriter:
                 "@mixin font-subset( $index, $range ) {{\n"
                 "  @font-face {{\n"
                 "    font-family: '{name}';\n"
-                "    font-style: normal;\n"
+                "    font-style: {style};\n"
                 "    font-weight: {weight}\n"
                 "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff2') format('woff2'),\n"
                 "         url('{dest}/{name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
@@ -172,6 +174,7 @@ class StyleWriter:
             )).format(
                 name=self.font_info.name,
                 weight=self.font_info.weight,
+                style=self.font_info.style,
                 dest="."
             )
         )
@@ -186,7 +189,7 @@ class StyleWriter:
             ((
                 "@font-face {{\n"
                 "  font-family: '{name}';\n"
-                "  font-style: normal;\n"
+                "  font-style: {style};\n"
                 "  font-weight: {weight};\n"
                 "  src: url('{dest}/{name}/{weight}/{index}.woff2') format('woff2'),\n"
                 "       url('{dest}/{name}/{weight}/{index}.woff' ) format('woff' );\n"
@@ -195,6 +198,7 @@ class StyleWriter:
             )).format(
                 name=self.font_info.name,
                 weight=self.font_info.weight,
+                style=self.font_info.style,
                 index=index,
                 range=unicode_range,
                 dest="."
