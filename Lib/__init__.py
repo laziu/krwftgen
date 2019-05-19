@@ -138,7 +138,8 @@ class TempFolder:
 class FontInfo:
     def __init__(self, name, format_list, weight, style):
         self.name = name
-        self.format_list = format_list
+        self.esc_name = re.sub(r'\W', "_", name)
+        self.format_list = format_list.split(',')
         self.weight = weight
         self.style = style
 
@@ -149,12 +150,11 @@ class StyleWriter:
         self.temp_folder = temp_folder
 
     def __enter__(self):
-        esc_name = re.sub(r'\s', "_", self.font_info.name)
-        gen_path(self.temp_folder.path(esc_name))
+        gen_path(self.temp_folder.path(self.font_info.esc_name))
         self.css = open(self.temp_folder.path(
-            f"{esc_name}/{self.font_info.weight}.css"), "w")
+            f"{self.font_info.esc_name}/{self.font_info.weight}.css"), "w")
         self.scss = open(self.temp_folder.path(
-            f"{esc_name}/{self.font_info.weight}.scss"), "w")
+            f"{self.font_info.esc_name}/{self.font_info.weight}.scss"), "w")
         self.scss.write(
             ((
                 "@mixin font-subset( $index, $range ) {{\n"
@@ -169,6 +169,7 @@ class StyleWriter:
                 "}}\n\n"
             )).format(
                 name=self.font_info.name,
+                esc_name=self.font_info.esc_name,
                 weight=self.font_info.weight,
                 style=self.font_info.style,
                 dest="."
@@ -193,6 +194,7 @@ class StyleWriter:
                 "}}\n\n"
             )).format(
                 name=self.font_info.name,
+                esc_name=self.font_info.esc_name,
                 weight=self.font_info.weight,
                 style=self.font_info.style,
                 index=index,
