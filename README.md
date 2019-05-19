@@ -1,5 +1,3 @@
-#### ※ 완성되지 않은 프로젝트입니다. ※
-
 ## 이게 뭔가요?
 
 한글 폰트를 [fonttools](https://github.com/fonttools/fonttools)를 이용해
