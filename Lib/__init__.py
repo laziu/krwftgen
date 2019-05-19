@@ -161,9 +161,15 @@ class StyleWriter:
                 "  @font-face {{\n"
                 "    font-family: '{name}';\n"
                 "    font-style: {style};\n"
-                "    font-weight: {weight}\n"
-                "    src: url('{dest}/{name}/{weight}/#{{$index}}.woff2') format('woff2'),\n"
-                "         url('{dest}/{name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
+                "    font-weight: {weight};\n"
+            ) + ((
+                "    src: url('{dest}/{esc_name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
+            ) if 'woff2' not in self.font_info.format_list else (
+                "    src: url('{dest}/{esc_name}/{weight}/#{{$index}}.woff2') format('woff2');\n"
+            ) if 'woff' not in self.font_info.format_list else (
+                "    src: url('{dest}/{esc_name}/{weight}/#{{$index}}.woff2') format('woff2'),\n"
+                "         url('{dest}/{esc_name}/{weight}/#{{$index}}.woff' ) format('woff ');\n"
+            )) + (
                 "    unicode-range: #{{$range}};\n"
                 "  }}\n"
                 "}}\n\n"
@@ -188,8 +194,14 @@ class StyleWriter:
                 "  font-family: '{name}';\n"
                 "  font-style: {style};\n"
                 "  font-weight: {weight};\n"
-                "  src: url('{dest}/{name}/{weight}/{index}.woff2') format('woff2'),\n"
-                "       url('{dest}/{name}/{weight}/{index}.woff' ) format('woff' );\n"
+            ) + ((
+                "    src: url('{dest}/{esc_name}/{weight}/{index}.woff' ) format('woff' );\n"
+            ) if 'woff2' not in self.font_info.format_list else (
+                "    src: url('{dest}/{esc_name}/{weight}/{index}.woff2') format('woff2'),\n"
+            ) if 'woff' not in self.font_info.format_list else (
+                "    src: url('{dest}/{esc_name}/{weight}/{index}.woff2') format('woff2'),\n"
+                "         url('{dest}/{esc_name}/{weight}/{index}.woff' ) format('woff' );\n"
+            )) + (
                 "  unicode-range: {range};\n"
                 "}}\n\n"
             )).format(
