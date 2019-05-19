@@ -16,10 +16,6 @@ browser_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
 @click.command(options_metavar='[options]',
                context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version='0.1.0')
-@click.option('-o', '--output', 'output_path', metavar='<file>',
-              type=click.Path(exists=False, dir_okay=False, resolve_path=True),
-              default=lambda: rel_path('<file>'),
-              help='The output archive file path.')
 @click.option('-n', '--name', metavar='<text>', type=click.STRING,
               help='font-name of output fonts.  [default: <font-file>]')
 @click.option('-f', '--format', metavar='<text>[,..]',
@@ -32,7 +28,7 @@ browser_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (K
               default='normal', show_default=True)
 @click.argument('font_path', metavar='<font-path>',
                 type=click.Path(exists=True, dir_okay=False, resolve_path=True))
-def krwftgen(output_path, name, format, weight, style, font_path):
+def krwftgen(name, format, weight, style, font_path):
     """\
     krwftgen -- Korean webfont generator
 
