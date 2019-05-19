@@ -57,8 +57,6 @@ def krwftgen(name, format, weight, style, font_path):
             i_str = "%03d" % i
             print(f'processing ({i_str}/{list_len})')
             make_subset(font_path, out_path, i_str, urange, font_info)
-            make_subset(font_path, out_path, i_str,
-                        urange, font_info, woff2=True)
             wb.css_write(i_str, urange)
             wb.scss_write(i_str, urange)
 
@@ -84,11 +82,12 @@ def unicode_subranges():
     return unicodes
 
 
-def make_subset(font_path, out_path, index, uni_range, font_info, woff2=False):
-    commands = [
+def make_subset(font_path, out_path, index, uni_range, font_info):
+    def commands(format):
+        return [
         font_path,
         f"--unicodes={uni_range}",
-        f"--output-file={out_path}/{index}.{'woff2' if woff2 else 'woff'}",
+            f"--output-file={out_path}/{index}.{format}",
         "--layout-features='*'",
         "--glyph-names",
         "--symbol-cmap",
@@ -101,12 +100,10 @@ def make_subset(font_path, out_path, index, uni_range, font_info, woff2=False):
         "--name-IDs='*'",
         "--name-languages='*'"
     ]
-    if woff2:
-        commands.append('--flavor=woff2')
-    else:
-        commands.append('--flavor=woff')
-        commands.append('--with-zopfli')
-    pyftsubset(commands)
+    if 'woff2' in font_info.format_list:
+        pyftsubset(commands('woff2') + ['--flavor=woff2'])
+    if 'woff' in font_info.format_list:
+        pyftsubset(commands('woff') + ['--flavor=woff', '--with-zopfli'])
 
 
 def rel_path(relative_path):
