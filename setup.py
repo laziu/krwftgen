@@ -1,9 +1,16 @@
 from setuptools import setup, find_packages
+from os import path
+
+this_dir = path.abspath(path.dirname(__file__))
+with open(path.join(this_dir, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='krwftgen',
-    version='0.1',
+    version='0.1.1',
     description='Korean webfont generator using Google Fonts + Korean',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     author='Laziu Kim',
     author_email='laziu.cc@gmail.com',
     url='https://github.com/laziu/krwftgen',
