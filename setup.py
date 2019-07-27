@@ -7,7 +7,8 @@ setup(
     author='Laziu Kim',
     author_email='laziu.cc@gmail.com',
     url='https://github.com/laziu/krwftgen',
-    download_url='https://github.com/laziu/krwftgen/archive/???',
+    download_url='https://github.com/laziu/krwftgen/archive/0.1.tar.gz',
+    zip_safe=False,
     python_requires='>=3.4',
     install_requires=[
         'fonttools==3.39.0',
@@ -22,11 +23,16 @@ setup(
         'docutils==0.14'
     ],
     packages=find_packages('Lib'),
+    package_data={},
     entry_points={
         'console_scripts': [
             'krwftgen = Lib.__init__:krwftgen'
         ]
     },
+    keywords=[
+        'krwftgen',
+        'fonttools'
+    ],
     classifiers=[
         'Topic :: Text Processing :: Fonts',
         'Natural Language :: Korean'
