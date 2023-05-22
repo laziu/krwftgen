@@ -22,7 +22,7 @@ setup(
         'brotli==1.0.7; platform_python_implementation != "PyPy"',
         'brotlipy==0.7.0; platform_python_implementation == "PyPy"',
         'zopfli==0.1.6',
-        'requests==2.21.0'
+        'requests==2.31.0'
     ],
     setup_requires=[
         'autopep8==1.4.3',
